@@ -233,7 +233,7 @@
       "location": "[parameters('location')]",
       "copy": {
         "name": "nicopy",
-        "count": 4
+        "count": 3
       },
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
@@ -268,7 +268,7 @@
       "location": "[parameters('location')]",
       "copy": {
         "name": "ipcopy",
-        "count": 4
+        "count": 3
       },
       "properties": {
         "publicIpAllocationMethod": "[variables('networkSettings').publicIpAllocationMethod]"
