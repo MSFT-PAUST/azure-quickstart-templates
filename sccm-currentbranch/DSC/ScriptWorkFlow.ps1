@@ -1,4 +1,4 @@
-Param($DomainFullName,$CM,$CMUser,$DPMPName,$ClientName)
+Param($DomainFullName,$CM,$CMUser,$ClientName)
 
 $Role = "PS1"
 $ProvisionToolPath = "$env:windir\temp\ProvisionScript"
@@ -26,16 +26,6 @@ else
             StartTime = ''
             EndTime = ''
         }
-        InstallDP = @{
-            Status = 'NotStart'
-            StartTime = ''
-            EndTime = ''
-        }
-        InstallMP = @{
-            Status = 'NotStart'
-            StartTime = ''
-            EndTime = ''
-        }
         InstallClient = @{
             Status = 'NotStart'
             StartTime = ''
@@ -51,17 +41,7 @@ $ScriptFile = Join-Path -Path $ProvisionToolPath -ChildPath "InstallAndUpdateSCC
 
 . $ScriptFile $DomainFullName $CM $CMUser $Role $ProvisionToolPath
 
-#Install DP
-$ScriptFile = Join-Path -Path $ProvisionToolPath -ChildPath "InstallDP.ps1"
-
-. $ScriptFile $DomainFullName $DPMPName $Role $ProvisionToolPath
-
-#Install MP
-$ScriptFile = Join-Path -Path $ProvisionToolPath -ChildPath "InstallMP.ps1"
-
-. $ScriptFile $DomainFullName $DPMPName $Role $ProvisionToolPath
-
 #Install Client
 $ScriptFile = Join-Path -Path $ProvisionToolPath -ChildPath "InstallClient.ps1"
 
-. $ScriptFile $DomainFullName $CMUser $ClientName $DPMPName $Role $ProvisionToolPath
+. $ScriptFile $DomainFullName $CMUser $ClientName $Role $ProvisionToolPath
