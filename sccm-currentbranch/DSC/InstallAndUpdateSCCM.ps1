@@ -38,6 +38,11 @@ ClientsUsePKICertificate=0
 PrerequisiteComp=0
 PrerequisitePath=C:\%CM%\REdist
 MobileDeviceLanguage=0
+ManagementPoint=%MachineFQDN%
+ManagementPointProtocol=HTTP
+DistributionPoint=%MachineFQDN%
+DistributionPointProtocol=HTTP
+DistributionPointInstallIIS=0
 AdminConsole=1
 JoinCEIP=0
 
