@@ -52,7 +52,7 @@
         InstallFeatureForSCCM InstallFeature
         {
             NAME = "PS"
-            Role = "Site Server"
+            Role = "Site Server","Distribution Point","Management Point"
             DependsOn = "[AddBuiltinPermission]AddSQLPermission"
         }
 
@@ -113,7 +113,7 @@
         OpenFirewallPortForSCCM OpenFirewall
         {
             Name = "PS"
-            Role = "Site Server"
+            Role = "Site Server","Distribution Point","Management Point"
             DependsOn = "[JoinDomain]JoinDomain"
         }
 
