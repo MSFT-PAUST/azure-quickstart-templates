@@ -1,4 +1,4 @@
-Param($DomainFullName,$CMUser,$ClientName,$DPMPName,$Role,$ProvisionToolPath)
+Param($DomainFullName,$CMUser,$ClientName,$Role,$ProvisionToolPath)
 
 $logpath = $ProvisionToolPath+"\InstallClientLog.txt"
 $ConfigurationFile = Join-Path -Path $ProvisionToolPath -ChildPath "$Role.json"
@@ -12,7 +12,7 @@ $DomainUserName = $CMUser
 $SiteCode = $Role
 
 $ProviderMachineName = $env:COMPUTERNAME+"."+$DomainFullName # SMS Provider machine name
-$DPMPMachineName = $DPMPName +"." + $DomainFullName
+#$DPMPMachineName = $DPMPName +"." + $DomainFullName
 
 # Customizations
 $initParams = @{}
@@ -40,7 +40,7 @@ while((Get-PSDrive -Name $SiteCode -PSProvider CMSite -ErrorAction SilentlyConti
 # Set the current location to be the site code.
 Set-Location "$($SiteCode):\" @initParams
 
-"[$(Get-Date -format HH:mm:ss)] Setting system descovery..." | Out-File -Append $logpath
+"[$(Get-Date -format HH:mm:ss)] Setting system discovery..." | Out-File -Append $logpath
 $DomainName = $DomainFullName.split('.')[0]
 $lastdomainname = $DomainFullName.Split(".")[-1]
 while(((Get-CMDiscoveryMethod | ?{$_.ItemName -eq "SMS_AD_SYSTEM_DISCOVERY_AGENT|SMS Site Server"}).Props | ?{$_.PropertyName -eq "Settings"}).value1.ToLower() -ne "active")
@@ -60,7 +60,7 @@ $boundaryrange = $clientIP+"-"+$clientIP
 "[$(Get-Date -format HH:mm:ss)] Create boundary and boundary group..." | Out-File -Append $logpath
 New-CMBoundary -Type IPRange -Name Client -Value $boundaryrange
 
-New-CMBoundaryGroup -Name $SiteCode -DefaultSiteCode $SiteCode -AddSiteSystemServerName $DPMPMachineName
+New-CMBoundaryGroup -Name $SiteCode -DefaultSiteCode $SiteCode -AddSiteSystemServerName $ProviderMachineName
 
 Add-CMBoundaryToGroup -BoundaryName Client -BoundaryGroupName $SiteCode
 
