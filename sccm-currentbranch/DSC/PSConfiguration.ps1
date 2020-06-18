@@ -7,8 +7,6 @@
         [Parameter(Mandatory)]
         [String]$DCName,
         [Parameter(Mandatory)]
-        [String]$DPMPName,
-        [Parameter(Mandatory)]
         [String]$ClientName,
         [Parameter(Mandatory)]
         [String]$Win7ClientName,
@@ -29,7 +27,7 @@
     $LogPath = "c:\$LogFolder"
     $DName = $DomainName.Split(".")[0]
     $DCComputerAccount = "$DName\$DCName$"
-    $DPMPComputerAccount = "$DName\$DPMPName$"
+    #$DPMPComputerAccount = "$DName\$DPMPName$"
     
     [System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
 
@@ -151,7 +149,7 @@
             TaskName = "ScriptWorkFlow"
             ScriptName = "ScriptWorkFlow.ps1"
             ScriptPath = $PSScriptRoot
-            ScriptArgument = "$DomainName $CM $DName\$($Admincreds.UserName) $DPMPName $ClientName $Win7ClientName"
+            ScriptArgument = "$DomainName $CM $DName\$($Admincreds.UserName) $ClientName $Win7ClientName"
             Ensure = "Present"
             DependsOn = "[FileReadAccessShare]CMSourceSMBShare"
         }

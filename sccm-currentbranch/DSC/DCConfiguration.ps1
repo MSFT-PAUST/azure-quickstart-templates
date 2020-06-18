@@ -29,6 +29,7 @@
     $PSComputerAccount = "$DName\$PSName$"
    # $DPMPComputerAccount = "$DName\$DPMPName$"
     $ClientComputerAccount = "$DName\$ClientName$"
+    $Win7ClientComputerAccount = "$DName\$Win7ClientName$"
 
     [System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
 
@@ -88,19 +89,28 @@
             DependsOn = "[InstallCA]InstallCA"
         }
 
+
+        VerifyComputerJoinDomain WaitForWin7Client
+        {
+            ComputerName = $Win7ClientName
+            Ensure = "Present"
+            DependsOn = "[InstallCA]InstallCA"
+        }
+
+
         File ShareFolder
         {            
             DestinationPath = $LogPath     
             Type = 'Directory'            
             Ensure = 'Present'
-            DependsOn = @("[VerifyComputerJoinDomain]WaitForPS","[VerifyComputerJoinDomain]WaitForClient")
+            DependsOn = @("[VerifyComputerJoinDomain]WaitForPS","[VerifyComputerJoinDomain]WaitForClient","[VerifyComputerJoinDomain]WaitForWin7Client")
         }
 
         FileReadAccessShare DomainSMBShare
         {
             Name   = $LogFolder
             Path =  $LogPath
-            Account = $PSComputerAccount,$ClientComputerAccount
+            Account = $PSComputerAccount,$ClientComputerAccount,$Win7ClientComputerAccount
             DependsOn = "[File]ShareFolder"
         }
 
@@ -129,6 +139,16 @@
             Role = "DC"
             LogPath = $LogPath
             WriteNode = "ClientJoinDomain"
+            Status = "Passed"
+            Ensure = "Present"
+            DependsOn = "[FileReadAccessShare]DomainSMBShare"
+        }
+
+        WriteConfigurationFile WriteWin7ClientJoinDomain
+        {
+            Role = "DC"
+            LogPath = $LogPath
+            WriteNode = "Win7ClientJoinDomain"
             Status = "Passed"
             Ensure = "Present"
             DependsOn = "[FileReadAccessShare]DomainSMBShare"
