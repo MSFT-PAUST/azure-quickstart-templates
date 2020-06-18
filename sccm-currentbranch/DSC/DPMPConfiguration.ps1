@@ -11,6 +11,10 @@
         [Parameter(Mandatory)]
         [String]$ClientName,
         [Parameter(Mandatory)]
+        [String]$Win7ClientName,
+        [Parameter(Mandatory)]
+        [String]$AADClientName,
+        [Parameter(Mandatory)]
         [String]$PSName,
         [Parameter(Mandatory)]
         [String]$DNSIPAddress,
