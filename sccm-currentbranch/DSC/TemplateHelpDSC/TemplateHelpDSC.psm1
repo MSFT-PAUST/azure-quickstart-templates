@@ -854,6 +854,7 @@ class SetWin7DNS
         $dnsset = gwmi win32_networkadapterconfiguration | where DefaultIPGateway
         Write-Verbose "Set dns: $_DNSIPAddress for $($dnsset.Description)"
         (gwmi win32_networkadapterconfiguration | where DefaultIPGateway).SetDNSServerSearchOrder($_DNSIPAddress)
+		cmd /c "NetSh Advfirewall set allprofiles state off"
     }
 
     [bool] Test()
