@@ -1,4 +1,4 @@
-Param($DomainFullName,$CMUser,$ClientName,$Role,$ProvisionToolPath)
+Param($DomainFullName,$CMUser,$ClientName,$Win7ClientName,$Role,$ProvisionToolPath)
 
 $logpath = $ProvisionToolPath+"\InstallClientLog.txt"
 $ConfigurationFile = Join-Path -Path $ProvisionToolPath -ChildPath "$Role.json"
@@ -53,16 +53,22 @@ Invoke-CMSystemDiscovery
 
 #Get Client IP
 $clientIP= (Test-Connection $ClientName -count 1 | select @{Name="Computername";Expression={$_.Address}},Ipv4Address).IpV4Address.IPAddressToString
+#Get Windows 7 Client IP
+$Win7ClientIP= (Test-Connection $Win7ClientName -count 1 | select @{Name="Computername";Expression={$_.Address}},Ipv4Address).IpV4Address.IPAddressToString
 
 "[$(Get-Date -format HH:mm:ss)] Client IP is $clientIP." | Out-File -Append $logpath
+"[$(Get-Date -format HH:mm:ss)] Windows 7 Client IP is $Win7ClientIP." | Out-File -Append $logpath
 $boundaryrange = $clientIP+"-"+$clientIP
+$win7boundaryrange = $Win7ClientIP+"-"+$Win7ClientIP
 
 "[$(Get-Date -format HH:mm:ss)] Create boundary and boundary group..." | Out-File -Append $logpath
 New-CMBoundary -Type IPRange -Name Client -Value $boundaryrange
+New-CMBoundary -Type IPRange -Name Win7Client -Value $win7boundaryrange
 
 New-CMBoundaryGroup -Name $SiteCode -DefaultSiteCode $SiteCode -AddSiteSystemServerName $ProviderMachineName
 
 Add-CMBoundaryToGroup -BoundaryName Client -BoundaryGroupName $SiteCode
+Add-CMBoundaryToGroup -BoundaryName Win7Client -BoundaryGroupName $SiteCode
 
 #Wait collection
 $machinelist = (get-cmdevice -CollectionName "all systems").Name
@@ -74,6 +80,17 @@ while($machinelist -notcontains $ClientName)
 }
 "[$(Get-Date -format HH:mm:ss)]Push Client..." | Out-File -Append $logpath
 Install-CMClient -DeviceName $ClientName -SiteCode $SiteCode -AlwaysInstallClient $true
+"[$(Get-Date -format HH:mm:ss)]Done." | Out-File -Append $logpath
+
+while($machinelist -notcontains $Win7ClientName)
+{
+    "[$(Get-Date -format HH:mm:ss)] Waiting for Windows 7 client appear in all systems collection." | Out-File -Append $logpath
+    Start-Sleep -Seconds 20
+    $machinelist = (get-cmdevice -CollectionName "all systems").Name
+}
+"[$(Get-Date -format HH:mm:ss)]Push Client..." | Out-File -Append $logpath
+
+Install-CMClient -DeviceName $Win7ClientName -SiteCode $SiteCode -AlwaysInstallClient $true
 "[$(Get-Date -format HH:mm:ss)]Done." | Out-File -Append $logpath
 
 $Configuration.InstallClient.Status = 'Completed'

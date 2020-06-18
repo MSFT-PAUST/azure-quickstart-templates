@@ -1,4 +1,4 @@
-Param($DomainFullName,$CM,$CMUser,$ClientName)
+Param($DomainFullName,$CM,$CMUser,$ClientName,$Win7ClientName)
 
 $Role = "PS1"
 $ProvisionToolPath = "$env:windir\temp\ProvisionScript"
@@ -44,4 +44,4 @@ $ScriptFile = Join-Path -Path $ProvisionToolPath -ChildPath "InstallAndUpdateSCC
 #Install Client
 $ScriptFile = Join-Path -Path $ProvisionToolPath -ChildPath "InstallClient.ps1"
 
-. $ScriptFile $DomainFullName $CMUser $ClientName $Role $ProvisionToolPath
+. $ScriptFile $DomainFullName $CMUser $ClientName $Win7ClientName $Role $ProvisionToolPath
