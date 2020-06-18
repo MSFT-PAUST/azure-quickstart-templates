@@ -110,13 +110,13 @@
         AddUserToLocalAdminGroup AddADUserToLocalAdminGroup {
             Name = $($Admincreds.UserName)
             DomainName = $DomainName
-            DependsOn = "[FileReadAccessShare]DomainSMBShare"
+            DependsOn = "[JoinDomain]JoinDomain"
         }
 
         AddUserToLocalAdminGroup AddADComputerToLocalAdminGroup {
             Name = "$PrimarySiteName"
             DomainName = $DomainName
-            DependsOn = "[FileReadAccessShare]DomainSMBShare"
+            DependsOn = "[JoinDomain]JoinDomain"
         }
 
     #    WriteConfigurationFile WriteClientFinished
