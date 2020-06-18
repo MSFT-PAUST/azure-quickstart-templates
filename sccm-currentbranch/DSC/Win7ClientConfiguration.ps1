@@ -46,7 +46,7 @@
             MaximumSize = '8192'
         }
 
-        SetDNS DnsServerAddress
+        SetWin7DNS DnsServerAddress
         {
             DNSIPAddress = $DNSIPAddress
             Ensure = "Present"
@@ -64,7 +64,7 @@
         {
             Ensure = "Present"
             DCName = $DCName
-            DependsOn = "[SetDNS]DnsServerAddress"
+            DependsOn = "[SetWin7DNS]DnsServerAddress"
         }
 
         JoinDomain JoinDomain
@@ -121,9 +121,9 @@
 
         WriteConfigurationFile WriteClientFinished
         {
-            Role = "Client"
+            Role = "Win7Client"
             LogPath = $LogPath
-            WriteNode = "ClientFinished"
+            WriteNode = "Win7ClientFinished"
             Status = "Passed"
             Ensure = "Present"
             DependsOn = "[AddUserToLocalAdminGroup]AddADUserToLocalAdminGroup","[AddUserToLocalAdminGroup]AddADComputerToLocalAdminGroup"

@@ -17,6 +17,7 @@ DscResourcesToExport = @(
     'WaitForDomainReady',
     'VerifyComputerJoinDomain',
     'SetDNS',
+	'SetWin7DNS',
     'ChangeSQLServicesAccount',
     'RegisterTaskScheduler',
     'DownloadSCCM',

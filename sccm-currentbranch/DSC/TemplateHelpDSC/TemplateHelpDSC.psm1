@@ -249,6 +249,11 @@ class WriteConfigurationFile
                     StartTime = ''
                     EndTime = ''
                 }
+				AADClientJoinDomain = @{
+                    Status = 'NotStart'
+                    StartTime = ''
+                    EndTime = ''
+                }
                 DelegateControl = @{
                     Status = 'NotStart'
                     StartTime = ''
@@ -265,6 +270,16 @@ class WriteConfigurationFile
                     EndTime = ''
                 }
                 ClientFinished = @{
+                    Status = 'NotStart'
+                    StartTime = ''
+                    EndTime = ''
+                }
+			    Win7ClientFinished = @{
+                    Status = 'NotStart'
+                    StartTime = ''
+                    EndTime = ''
+                }
+				AADClientFinished = @{
                     Status = 'NotStart'
                     StartTime = ''
                     EndTime = ''
@@ -816,6 +831,43 @@ class SetDNS
     }
 
     [SetDNS] Get()
+    {
+        return $this
+    }
+}
+
+[DscResource()]
+class SetWin7DNS
+{
+    [DscProperty(key)]
+    [string] $DNSIPAddress
+
+    [DscProperty(Mandatory)]
+    [Ensure] $Ensure
+
+    [DscProperty(NotConfigurable)]
+    [Nullable[datetime]] $CreationTime
+
+    [void] Set()
+    {
+        $_DNSIPAddress = $this.DNSIPAddress
+        $dnsset = gwmi win32_networkadapterconfiguration | where DefaultIPGateway
+        Write-Verbose "Set dns: $_DNSIPAddress for $($dnsset.Description)"
+        (gwmi win32_networkadapterconfiguration | where DefaultIPGateway).SetDNSServerSearchOrder($_DNSIPAddress)
+    }
+
+    [bool] Test()
+    {
+        $_DNSIPAddress = $this.DNSIPAddress
+        $dnsset = gwmi win32_networkadapterconfiguration | where DefaultIPGateway
+        if($dnsset.DNSServerSearchOrder -contains $_DNSIPAddress)
+        {
+            return $true
+        }
+        return $false
+    }
+
+    [SetWin7DNS] Get()
     {
         return $this
     }

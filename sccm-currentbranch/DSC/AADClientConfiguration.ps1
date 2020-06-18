@@ -69,9 +69,9 @@
 
         WriteConfigurationFile WriteClientFinished
         {
-            Role = "Client"
+            Role = "AADClient"
             LogPath = $LogPath
-            WriteNode = "ClientFinished"
+            WriteNode = "AADClientFinished"
             Status = "Passed"
             Ensure = "Present"
             DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
