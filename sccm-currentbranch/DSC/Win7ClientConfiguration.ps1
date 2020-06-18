@@ -92,13 +92,13 @@
             DependsOn = "[WaitForConfigurationFile]WaitForPSJoinDomain"
         }
 
-        FileReadAccessShare DomainSMBShare
-        {
-            Name   = $LogFolder
-            Path = $LogPath
-            Account = $DCComputerAccount,$PSComputerAccount
-            DependsOn = "[File]ShareFolder"
-        }
+     #   FileReadAccessShare DomainSMBShare
+     #   {
+     #       Name   = $LogFolder
+     #       Path = $LogPath
+     #       Account = $DCComputerAccount,$PSComputerAccount
+     #       DependsOn = "[File]ShareFolder"
+     #   }
 
         OpenFirewallPortForSCCM OpenFirewall
         {
@@ -119,14 +119,14 @@
             DependsOn = "[FileReadAccessShare]DomainSMBShare"
         }
 
-        WriteConfigurationFile WriteClientFinished
-        {
-            Role = "Win7Client"
-            LogPath = $LogPath
-            WriteNode = "Win7ClientFinished"
-            Status = "Passed"
-            Ensure = "Present"
-            DependsOn = "[AddUserToLocalAdminGroup]AddADUserToLocalAdminGroup","[AddUserToLocalAdminGroup]AddADComputerToLocalAdminGroup"
-        }
+    #    WriteConfigurationFile WriteClientFinished
+    #    {
+    #        Role = "Win7Client"
+    #        LogPath = $LogPath
+    #        WriteNode = "Win7ClientFinished"
+    #        Status = "Passed"
+    #        Ensure = "Present"
+    #        DependsOn = "[AddUserToLocalAdminGroup]AddADUserToLocalAdminGroup","[AddUserToLocalAdminGroup]AddADComputerToLocalAdminGroup"
+    #    }
     }
 }

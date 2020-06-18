@@ -144,16 +144,6 @@
             DependsOn = "[FileReadAccessShare]DomainSMBShare"
         }
 
-        WriteConfigurationFile WriteWin7ClientJoinDomain
-        {
-            Role = "DC"
-            LogPath = $LogPath
-            WriteNode = "Win7ClientJoinDomain"
-            Status = "Passed"
-            Ensure = "Present"
-            DependsOn = "[FileReadAccessShare]DomainSMBShare"
-        }
-
         DelegateControl AddPS
         {
             Machine = $PSName

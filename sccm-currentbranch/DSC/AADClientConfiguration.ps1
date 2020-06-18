@@ -67,14 +67,14 @@
             DependsOn = "[SetCustomPagingFile]PagingSettings"
         }
 
-        WriteConfigurationFile WriteClientFinished
-        {
-            Role = "AADClient"
-            LogPath = $LogPath
-            WriteNode = "AADClientFinished"
-            Status = "Passed"
-            Ensure = "Present"
-            DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
-        }
+      #  WriteConfigurationFile WriteClientFinished
+       #{
+        #    Role = "AADClient"
+         #   LogPath = $LogPath
+          #  WriteNode = "AADClientFinished"
+           # Status = "Passed"
+            #Ensure = "Present"
+            #DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
+        #}
     }
 }
