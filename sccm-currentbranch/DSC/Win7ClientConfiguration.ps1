@@ -113,6 +113,12 @@
             DependsOn = "[JoinDomain]JoinDomain"
         }
 
+		RequestCertificate RequestCertificate
+        {
+            Name = $Win7ClientName
+			Role = "Windows 7 Client"
+            DependsOn = "[JoinDomain]JoinDomain"
+        }
     #    WriteConfigurationFile WriteClientFinished
     #    {
     #        Role = "Win7Client"

@@ -31,7 +31,10 @@ DscResourcesToExport = @(
     'SetCustomPagingFile',
     'SetupDomain',
     'FileReadAccessShare',
-    'InstallCA'
+    'InstallCA',
+	'RequestCertificate',
+	'CreateTemplates'
+	
 )
 
 # Version number of this module.

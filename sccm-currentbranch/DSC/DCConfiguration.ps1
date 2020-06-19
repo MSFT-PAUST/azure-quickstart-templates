@@ -67,6 +67,20 @@
             HashAlgorithm = "SHA256"
             DependsOn = "[SetupDomain]FirstDS"
         }
+		
+		CreateTemplates CreateTemplates
+        {
+            Name = $DCName
+			Role = "DC"
+            DependsOn = "[InstallCA]InstallCA"
+        }
+		
+		RequestCertificate RequestCertificate
+        {
+            Name = $DCName
+			Role = "DC"
+            DependsOn = "[CreateTemplates]CreateTemplates"
+        }
 
         VerifyComputerJoinDomain WaitForPS
         {

@@ -118,6 +118,13 @@
             Role = "Site Server","Distribution Point","Management Point"
             DependsOn = "[JoinDomain]JoinDomain"
         }
+		
+	    RequestCertificate RequestCertificate
+        {
+            Name = $PSName
+			Role = "Site Server"
+            DependsOn = DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
+        }
 
         WaitForConfigurationFile DelegateControl
         {

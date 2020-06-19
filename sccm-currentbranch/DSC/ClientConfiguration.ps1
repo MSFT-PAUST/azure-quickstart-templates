@@ -106,6 +106,13 @@
             Role = "Client"
             DependsOn = "[JoinDomain]JoinDomain"
         }
+		
+		RequestCertificate RequestCertificate
+        {
+            Name = $ClientName
+			Role = "Client"
+            DependsOn = DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
+        }
 
         AddUserToLocalAdminGroup AddADUserToLocalAdminGroup {
             Name = $($Admincreds.UserName)

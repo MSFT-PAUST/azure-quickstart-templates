@@ -1902,3 +1902,350 @@ class InstallCA
     }
     
 }
+
+[DscResource()]
+class RequestCertificate
+{
+    [DscProperty(Key)]
+    [string] $Name
+
+    [DscProperty(Mandatory)]
+    [string[]] $Role
+
+    [void] Set()
+    {
+        $_Name = $this.Name + ".contoso.com"
+		$_Role = $this.Role
+        
+        Write-Verbose "Current Role is : $_Role"
+
+		if($_Role -notcontains "Windows 7 Client")
+		
+		{
+
+		Get-Certificate -Template "MECM_Client" -CertStoreLocation cert:\LocalMachine\My
+		
+		}
+		
+		else 
+		
+		{
+		
+		cmd /c "certreq -enroll -machine MECM_Client -q"
+		
+		}
+
+        if($_Role -contains "Site Server")
+        {
+            $cert = Get-Certificate -Template "MECM_IIS" -DnsName $_Name -CertStoreLocation cert:\LocalMachine\My
+			$cert.Certificate.FriendlyName = "MECM_IIS"
+			Import-Module WebAdministration
+			New-WebBinding -Name 'Default Web Site' -Protocol https -Port 443
+			$cert = Get-ChildItem cert:\LocalMachine\My | where-object {$_.FriendlyName -eq "MECM_IIS"}
+			$binding = Get-WebBinding -Name 'Default Web Site' -Protocol https
+			$binding.AddSslCertificate($cert.GetCertHashString(),"my")
+        }
+		
+		    $StatusPath = "$env:windir\temp\RequestCertificateStatus.txt"
+            "Finished" >> $StatusPath
+    }
+
+    [bool] Test()
+    {
+        $StatusPath = "$env:windir\temp\RequestCertificateStatus.txt"
+        if(Test-Path $StatusPath)
+        {
+            return $true
+        }
+
+        return $false
+    }
+
+    [RequestCertificate] Get()
+    {
+        return $this
+    }
+    
+}
+
+[DscResource()]
+class CreateTemplates
+{
+    [DscProperty(Key)]
+    [string] $Name
+
+    [DscProperty(Mandatory)]
+    [string[]] $Role
+
+    [void] Set()
+    {
+        $_Name = $this.Name + ".contoso.com"
+		$_Role = $this.Role
+        
+        Write-Verbose "Current Role is : $_Role"
+
+function Get-RandomHex {
+
+param ([int]$Length)
+
+    $Hex = '0123456789ABCDEF'
+
+    [string]$Return = $null
+
+    For ($i=1;$i -le $length;$i++) {
+
+        $Return += $Hex.Substring((Get-Random -Minimum 0 -Maximum 16),1)
+
+    }
+
+    Return $Return
+
+}
+
+ 
+
+function IsUniqueOID {
+
+param ($cn,$TemplateOID,$Server,$ConfigNC)
+
+    $Search = Get-ADObject -Server $Server `
+
+        -SearchBase "CN=OID,CN=Public Key Services,CN=Services,$ConfigNC" `
+
+        -Filter {cn -eq $cn -and msPKI-Cert-Template-OID -eq $TemplateOID}
+
+    If ($Search) {$False} Else {$True}
+
+}
+
+ 
+
+function New-TemplateOID {
+
+param($Server,$ConfigNC)
+
+    do {
+
+        $OID_Part_1 = Get-Random -Minimum 1000000  -Maximum 99999999
+
+        $OID_Part_2 = Get-Random -Minimum 10000000 -Maximum 99999999
+
+        $OID_Part_3 = Get-RandomHex -Length 32
+
+        $OID_Forest = Get-ADObject -Server $Server `
+
+            -Identity "CN=OID,CN=Public Key Services,CN=Services,$ConfigNC" `
+
+            -Properties msPKI-Cert-Template-OID |
+
+            Select-Object -ExpandProperty msPKI-Cert-Template-OID
+
+        $msPKICertTemplateOID = "$OID_Forest.$OID_Part_1.$OID_Part_2"
+
+        $Name = "$OID_Part_2.$OID_Part_3"
+
+    } until (IsUniqueOID -cn $Name -TemplateOID $msPKICertTemplateOID -Server $Server -ConfigNC $ConfigNC)
+
+    Return @{
+
+        TemplateOID  = $msPKICertTemplateOID
+
+        TemplateName = $Name
+
+    }
+
+}
+
+ 
+
+function New-CTemplate{
+
+param(
+
+    [string]$Name,
+
+    [string]$Type,
+
+    [string]$Server
+
+)
+
+ 
+
+$ConfigContext = ([ADSI]"LDAP://RootDSE").ConfigurationNamingContext
+
+$ADSI = [ADSI]"LDAP://CN=Certificate Templates,CN=Public Key Services,CN=Services,$ConfigContext"
+
+ 
+
+if ($Type -eq 'Server'){
+
+    $revision  = '100'
+
+    $mrevision = '2'
+
+    $app       = '1.3.6.1.5.5.7.3.1'
+
+    $WATempl2  = $ADSI.psbase.children | where {$_.displayName -match "Web Server"}
+
+    $spec      = "1"
+
+    $flags     = "131649"
+
+    $eflag     = "0"
+
+    $nflag     = "1"
+
+    $pkflag    = "16842752"
+
+}
+
+elseif($Type -eq 'Client'){
+
+    $revision  = '103'
+
+    $mrevision = '2'
+
+    $app       = '1.3.6.1.5.5.7.3.2'
+
+    $WATempl2  = $ADSI.psbase.children | where {$_.displayName -match "Workstation Authentication"}
+
+    $spec      = "1"
+
+    $flags     = "131680"
+
+    $eflag     = "40"
+
+    $nflag     = "134217728"
+
+    $pkflag    = "16842768"
+
+}
+
+ 
+
+$WATempl = $ADSI.psbase.children | where {$_.displayName -match "Subordinate Certification Authority"}
+
+ 
+
+$OID = (New-TemplateOID -Server $server -ConfigNC $ConfigContext).TemplateOID
+
+ 
+
+$NewTempl = $ADSI.Create("pKICertificateTemplate", "CN=$Name")
+
+$NewTempl.put("distinguishedName","CN=$Name,CN=Certificate Templates,CN=Public Key Services,CN=Services,$ConfigContext")
+
+ 
+
+$NewTempl.put("flags",$flags)
+
+$NewTempl.put("displayName","$Name")
+
+$NewTempl.put("revision",$revision)
+
+$NewTempl.put("msPKI-Template-Minor-Revision",$mrevision)
+
+$NewTempl.put("pKIDefaultKeySpec",$spec)
+
+$NewTempl.SetInfo()
+
+ 
+
+$NewTempl.put("pKIMaxIssuingDepth","0")
+
+$NewTempl.put("pKICriticalExtensions","2.5.29.15")
+
+$NewTempl.put("pKIExtendedKeyUsage",$app)
+
+$NewTempl.put("pKIDefaultCSPs","1,Microsoft RSA SChannel Cryptographic Provider")
+
+$NewTempl.put("msPKI-RA-Signature","0")
+
+$NewTempl.put("msPKI-Enrollment-Flag",$eflag)
+
+$NewTempl.put("msPKI-Private-Key-Flag",$pkflag)
+
+$NewTempl.put("msPKI-Certificate-Name-Flag",$nflag)
+
+$NewTempl.put("msPKI-Minimal-Key-Size","2048")
+
+$NewTempl.put("msPKI-Template-Schema-Version","2")
+
+$NewTempl.put("msPKI-Cert-Template-OID",$OID)
+
+$NewTempl.put("msPKI-Certificate-Application-Policy",$app)
+
+ 
+
+$NewTempl.pKIExpirationPeriod = $WATempl.pKIExpirationPeriod
+
+$NewTempl.pKIOverlapPeriod = $WATempl.pKIOverlapPeriod
+
+$NewTempl.pKIKeyUsage = $WATempl2.pKIKeyUsage
+
+ 
+
+$NewTempl.SetInfo()
+
+ 
+
+$AdObj = New-Object System.Security.Principal.NTAccount("Domain Computers")
+
+$identity = $AdObj.Translate([System.Security.Principal.SecurityIdentifier])
+
+$adRights = "ReadProperty, ExtendedRight, GenericExecute"
+
+$type = "Allow"
+
+ 
+
+$ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($identity,$adRights,$type)
+
+$NewTempl.psbase.ObjectSecurity.SetAccessRule($ACE)
+
+$NewTempl.psbase.commitchanges()
+
+ 
+
+$EnrollmentPath = "CN=Enrollment Services,CN=Public Key Services,CN=Services,$ConfigContext"
+
+$CAs = Get-ADObject -SearchBase $EnrollmentPath -SearchScope OneLevel -Filter * -Server $Server
+
+foreach ($CA in $CAs) {
+
+  Set-ADObject -Identity $CA.DistinguishedName -Add @{certificateTemplates=$Name} -Server $Server
+
+}
+
+ 
+
+}
+
+New-CTemplate -Name "MECM_Client" -Type "Client" -Server $_Name
+
+New-CTemplate -Name "MECM_IIS" -Type "Server" -Server $_Name
+	
+		    $StatusPath = "$env:windir\temp\CreateTemplatesStatus.txt"
+            "Finished" >> $StatusPath
+    }
+
+    [bool] Test()
+    {
+        $StatusPath = "$env:windir\temp\CreateTemplatesStatus.txt"
+        if(Test-Path $StatusPath)
+        {
+            return $true
+        }
+
+        return $false
+    }
+
+    [CreateTemplates] Get()
+    {
+        return $this
+    }
+    
+}
+
+
