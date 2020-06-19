@@ -111,7 +111,7 @@
         {
             Name = $ClientName
 			Role = "Client"
-            DependsOn = DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
+            DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
         }
 
         AddUserToLocalAdminGroup AddADUserToLocalAdminGroup {

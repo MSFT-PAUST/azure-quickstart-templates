@@ -123,7 +123,7 @@
         {
             Name = $PSName
 			Role = "Site Server"
-            DependsOn = DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
+            DependsOn = "[OpenFirewallPortForSCCM]OpenFirewall"
         }
 
         WaitForConfigurationFile DelegateControl
