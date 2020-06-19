@@ -1984,6 +1984,7 @@ class CreateTemplates
         
         Write-Verbose "Current Role is : $_Role"
 
+
 function Get-RandomHex {
 
 param ([int]$Length)
@@ -2008,11 +2009,7 @@ function IsUniqueOID {
 
 param ($cn,$TemplateOID,$Server,$ConfigNC)
 
-    $Search = Get-ADObject -Server $Server `
-
-        -SearchBase "CN=OID,CN=Public Key Services,CN=Services,$ConfigNC" `
-
-        -Filter {cn -eq $cn -and msPKI-Cert-Template-OID -eq $TemplateOID}
+    $Search = Get-ADObject -Server $Server -SearchBase "CN=OID,CN=Public Key Services,CN=Services,$ConfigNC" -Filter {cn -eq $cn -and msPKI-Cert-Template-OID -eq $TemplateOID}
 
     If ($Search) {$False} Else {$True}
 
@@ -2032,13 +2029,7 @@ param($Server,$ConfigNC)
 
         $OID_Part_3 = Get-RandomHex -Length 32
 
-        $OID_Forest = Get-ADObject -Server $Server `
-
-            -Identity "CN=OID,CN=Public Key Services,CN=Services,$ConfigNC" `
-
-            -Properties msPKI-Cert-Template-OID |
-
-            Select-Object -ExpandProperty msPKI-Cert-Template-OID
+        $OID_Forest = Get-ADObject -Server $Server -Identity "CN=OID,CN=Public Key Services,CN=Services,$ConfigNC" -Properties msPKI-Cert-Template-OID | Select-Object -ExpandProperty msPKI-Cert-Template-OID
 
         $msPKICertTemplateOID = "$OID_Forest.$OID_Part_1.$OID_Part_2"
 
