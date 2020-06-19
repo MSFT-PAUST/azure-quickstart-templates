@@ -100,12 +100,6 @@
      #       DependsOn = "[File]ShareFolder"
      #   }
 
-    #    OpenFirewallPortForSCCM OpenFirewall
-    #    {
-    #        Name = "Client"
-    #        Role = "Client"
-    #        DependsOn = "[JoinDomain]JoinDomain"
-    #    }
 
         AddUserToLocalAdminGroup AddADUserToLocalAdminGroup {
             Name = $($Admincreds.UserName)
