@@ -1919,21 +1919,7 @@ class RequestCertificate
         
         Write-Verbose "Current Role is : $_Role"
 
-		if($_Role -notcontains "Windows 7 Client")
-		
-		{
-
-		Get-Certificate -Template "MECM_Client" -CertStoreLocation cert:\LocalMachine\My
-		
-		}
-		
-		else 
-		
-		{
-		
-		cmd /c "certreq -enroll -machine MECM_Client -q"
-		
-		}
+		cmd /c "gpupdate /force"
 
         if($_Role -contains "Site Server")
         {
@@ -2216,6 +2202,10 @@ foreach ($CA in $CAs) {
 New-CTemplate -Name "MECM_Client" -Type "Client" -Server $_Name
 
 New-CTemplate -Name "MECM_IIS" -Type "Server" -Server $_Name
+
+New-GPO -Name "PC_Certificate_AutoEnrollment" | New-GPLink -Target "dc=contoso,dc=com"
+
+Set-GPRegistryValue -Name "PC_Certificate_AutoEnrollment" -Key "HKLM\SOFTWARE\Policies\Microsoft\Cryptography\AutoEnrollment" -ValueName AEPolicy -Type DWord -Value 7
 	
 		    $StatusPath = "$env:windir\temp\CreateTemplatesStatus.txt"
             "Finished" >> $StatusPath
